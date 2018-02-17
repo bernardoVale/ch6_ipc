@@ -63,6 +63,7 @@ int producer()
     sprintf(buffer, M_EXIT);
     mq_send(mq, buffer, MAX_SIZE, 0); 
 
+    sleep(30);
     mq_close(mq);
     mq_unlink(Q_NAME);
     return 0;
@@ -80,7 +81,7 @@ int consumer()
     do {
         printf("Queue not started, waiting for one more second\n");
         sleep(1);
-        mqd_t mq = mq_open(Q_NAME, O_RDONLY);
+        mq = mq_open(Q_NAME, O_RDONLY);
         not_started = (mqd_t)-1 == mq;
     } while (not_started == TRUE);
 

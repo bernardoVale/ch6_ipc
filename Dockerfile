@@ -6,4 +6,4 @@ RUN gcc -o /usr/bin/ipc ipc.c -lrt
 
 FROM ubuntu
 COPY --from=builder /usr/bin/ipc /usr/bin/ipc
-# ENTRYPOINT ["/usr/bin/ipc"]
+ENTRYPOINT ["/usr/bin/ipc"]
