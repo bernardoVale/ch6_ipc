@@ -15,6 +15,11 @@
 #define TRUE 1
 #define FALSE 0
 
+int producer();
+int consumer();
+void wait_for_queue(mqd_t *mq);
+
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -63,7 +68,6 @@ int producer()
     sprintf(buffer, M_EXIT);
     mq_send(mq, buffer, MAX_SIZE, 0); 
 
-    sleep(30);
     mq_close(mq);
     mq_unlink(Q_NAME);
     return 0;
@@ -73,17 +77,11 @@ int consumer()
 {
     struct mq_attr attr;
     char buffer[MAX_SIZE + 1];
-    int not_started;
+    ssize_t bytes_read;    
+    mqd_t mq;
 
-    ssize_t bytes_read;
-    mqd_t mq = mq_open(Q_NAME, O_RDONLY);
-    not_started = (mqd_t)-1 == mq;
-    do {
-        printf("Queue not started, waiting for one more second\n");
-        sleep(1);
-        mq = mq_open(Q_NAME, O_RDONLY);
-        not_started = (mqd_t)-1 == mq;
-    } while (not_started == TRUE);
+    // Wait until the queue is initialized by our producer
+    wait_for_queue(&mq);
 
     do {
         bytes_read = mq_receive(mq, buffer, MAX_SIZE, NULL);
@@ -93,4 +91,16 @@ int consumer()
 
     mq_close(mq);
     return 0;
+}
+
+void wait_for_queue(mqd_t *mq) {
+    int not_started;
+    *mq = mq_open(Q_NAME, O_RDONLY);
+    not_started = (mqd_t)-1 == *mq;
+    do {
+        printf("Queue not started, waiting for one more second\n");
+        sleep(1);
+        *mq = mq_open(Q_NAME, O_RDONLY);
+        not_started = (mqd_t)-1 == *mq;
+    } while (not_started == TRUE);
 }

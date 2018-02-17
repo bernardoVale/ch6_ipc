@@ -4,6 +4,6 @@ COPY . /work/ipc
 WORKDIR /work/ipc
 RUN gcc -o /usr/bin/ipc ipc.c -lrt
 
-FROM ubuntu
+FROM debian
 COPY --from=builder /usr/bin/ipc /usr/bin/ipc
 ENTRYPOINT ["/usr/bin/ipc"]
