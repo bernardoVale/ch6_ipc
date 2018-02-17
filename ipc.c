@@ -12,6 +12,8 @@
 #define MAX_SIZE  1024
 #define M_EXIT    "done"
 #define SRV_FLAG  "-producer"
+#define TRUE 1
+#define FALSE 0
 
 int main(int argc, char *argv[])
 {
@@ -70,12 +72,18 @@ int consumer()
 {
     struct mq_attr attr;
     char buffer[MAX_SIZE + 1];
+    int not_started;
+
     ssize_t bytes_read;
     mqd_t mq = mq_open(Q_NAME, O_RDONLY);
-    if ((mqd_t)-1 == mq) {
-        printf("Either the producer has not been started or maybe I cannot access the same memory...\n");
-        exit(1);
-    }
+    not_started = (mqd_t)-1 == mq;
+    do {
+        printf("Queue not started, waiting for one more second\n");
+        sleep(1);
+        mqd_t mq = mq_open(Q_NAME, O_RDONLY);
+        not_started = (mqd_t)-1 == mq;
+    } while (not_started == TRUE);
+
     do {
         bytes_read = mq_receive(mq, buffer, MAX_SIZE, NULL);
         buffer[bytes_read] = '\0';

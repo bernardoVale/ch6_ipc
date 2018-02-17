@@ -1,6 +1,9 @@
-FROM ubuntu:latest
+FROM ubuntu:latest as builder
 RUN apt-get update && apt-get -y install gcc libc-dev
 COPY . /work/ipc
 WORKDIR /work/ipc
-RUN gcc -o ipc ipc.c -lrt
-ENTRYPOINT ["./ipc"]
+RUN gcc -o /usr/bin/ipc ipc.c -lrt
+
+FROM ubuntu
+COPY --from=builder /usr/bin/ipc /usr/bin/ipc
+# ENTRYPOINT ["/usr/bin/ipc"]
